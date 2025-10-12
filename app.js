@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const listing = require("./models/listing");
 const path = require("path");
 const methoidOverride = require("method-override");
+const ejsMate = require("ejs-mate");
 
 main()
   .then(() => console.log("connected"))
@@ -22,8 +23,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methoidOverride("_method"));
 
+app.engine("ejs",ejsMate);
+
 app.listen("8080", () => {
   console.log("app is listening");
+});
+
+app.get("/", (req, res) => {
+  res.send("Wanderlust");
 });
 
 app.get("/listings", async (req, res) => {

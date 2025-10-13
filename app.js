@@ -51,7 +51,7 @@ app.get("/listings/:id", async (req, res) => {
 app.post("/listings",(req,res) => {
     let { title,description,image,price,location,country } = req.body;
     // console.log(title,description,image,price,location,country);
-    let newListing = new listing({ title,description,image,price,location,country });
+    let newListing = new listing({ title,description,image:{url:image},price,location,country });
     newListing.save();
     res.redirect("/listings");
 })
@@ -65,7 +65,7 @@ app.get("/listings/:id/edit",async (req,res) => {
 app.put("/listings/:id",async (req,res) => {
     let id = req.params.id;
     let { title,description,image,price,location,country } = req.body;
-    await listing.findByIdAndUpdate(id,{ title,description,image,price,location,country });
+    await listing.findByIdAndUpdate(id,{ title,description,image:{url:image},price,location,country });
     res.redirect(`/listings/${id}`);
 })
 

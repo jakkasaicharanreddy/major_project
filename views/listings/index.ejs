@@ -5,11 +5,11 @@
         <h2>All listings</h2>
         <br>
 
-        <div class="row row-cols-lg-3 ">
+        <div class="row  ">
             <%for(let listing of allListings){%>
 
 
-                <div class="card" style="width: 17rem;">
+                <div class="card" style="width: 23rem;">
                     <a href="/listings/<%= listing._id %>">
                         <img src="<%= listing.image.url %>" class="card-img-top" alt="listing image">
                                                  <div class="card-img-overlay"><%= listing.title %></div>

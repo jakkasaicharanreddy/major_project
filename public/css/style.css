@@ -132,3 +132,26 @@ height: 20rem;
     /* padding: 0; */
     margin: 0;
 }
+
+.add-btn,.edit-btn{
+    background-color: #fe424d;
+    border: none;
+    color: white;
+}
+
+.delete-btn{
+     background-color: #130e0e;
+    border: none;
+    color: white
+}
+
+/* show page */
+
+.show-img{
+    width: 120vh;
+}
+
+.buttons{
+    display: flex;
+    margin-top: 1.2rem ;
+}

@@ -5,6 +5,9 @@ const listing = require("./models/listing");
 const path = require("path");
 const methoidOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+let wrapAsync = require("./utils/wrapAsync.js")
+let ExpressError = require("./utils/ExpressError.js")
+
 
 main()
   .then(() => console.log("connected"))
@@ -25,52 +28,81 @@ app.use(methoidOverride("_method"));
 
 app.engine("ejs",ejsMate);
 
-app.listen("8080", () => {
-  console.log("app is listening");
-});
 
 app.get("/", (req, res) => {
   res.send("Wanderlust");
 });
 
-app.get("/listings", async (req, res) => {
+app.get("/listings", wrapAsync(async (req, res) => {
    const allListings  = await listing.find({});
    res.render("listings/index", { allListings });
-});
+}));
 
 app.get("/listings/new",(req,res) => {
     res.render("listings/new");
 })
 
-app.get("/listings/:id", async (req, res) => {
+app.get("/listings/:id",wrapAsync( async (req, res) => {
   let id = req.params.id;
   let list = await listing.findById(id);
   res.render("listings/show", { list });
-});
+}));
 
-app.post("/listings",(req,res) => {
-    let { title,description,image,price,location,country } = req.body;
-    // console.log(title,description,image,price,location,country);
+app.post("/listings",wrapAsync(async (req,res,next) => {
+
+  if(!req.body.listing){
+    throw new ExpressError(400,"All fields are required");
+  }
+  let { title,description,image,price,location,country } = req.body;
     let newListing = new listing({ title,description,image:{url:image},price,location,country });
-    newListing.save();
+    await newListing.save();
     res.redirect("/listings");
-})
 
-app.get("/listings/:id/edit",async (req,res) => {
+
+
+    // try{
+    //   let { title,description,image,price,location,country } = req.body;
+    // // console.log(title,description,image,price,location,country);
+    // let newListing = new listing({ title,description,image:{url:image},price,location,country });
+    // await newListing.save();
+    // res.redirect("/listings");
+    // }
+    // catch(err){
+    //   next(err);
+    // }
+}))
+
+app.get("/listings/:id/edit",wrapAsync(async (req,res) => {
     let id = req.params.id;
     let list = await listing.findById(id);
     res.render("listings/edit",{list});
-})
+}))
 
-app.put("/listings/:id",async (req,res) => {
+app.put("/listings/:id",wrapAsync(async (req,res) => {
     let id = req.params.id;
     let { title,description,image,price,location,country } = req.body;
     await listing.findByIdAndUpdate(id,{ title,description,image:{url:image},price,location,country });
     res.redirect(`/listings/${id}`);
-})
+}))
 
-app.delete("/listings/:id",async (req,res) => {
+app.delete("/listings/:id",wrapAsync(async (req,res) => {
     let id = req.params.id;
     await listing.findByIdAndDelete(id);
     res.redirect("/listings");
 })
+)
+
+app.use('/', (req, res, next) => {
+  next(new ExpressError(404, 'Page Not Found'));
+});
+
+app.use((err,req,res,next) => {
+ 
+ let { statusCode = 500,message = "Something went wrong" } = err;
+ res.render("listings/error",{err});
+  // res.status(statusCode).send(message);
+})
+
+app.listen("8080", () => {
+  console.log("app is listening");
+});

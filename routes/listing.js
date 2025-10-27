@@ -4,6 +4,9 @@ const listing = require("../models/listing");
 const wrapAsync = require("../utils/wrapAsync");
 let ExpressError = require("../utils/ExpressError.js");
 
+
+
+
 router.get(
   "/",
   wrapAsync(async (req, res) => {
@@ -19,8 +22,15 @@ router.get("/new", (req, res) => {
 router.get(
   "/:id",
   wrapAsync(async (req, res) => {
+
+    
     let id = req.params.id;
     let list = await listing.findById(id).populate("reviews");
+    console.log(list);
+    if (!list) {
+      req.flash("error","listing not found please check carefully");
+      return res.redirect("/listings");
+    }
     res.render("listings/show", { list });
   })
 );
@@ -41,6 +51,7 @@ router.post(
       country,
     });
     await newListing.save();
+    req.flash("success","Successfully created a new listing");
     res.redirect("/listings");
 
     // try{
@@ -61,6 +72,10 @@ router.get(
   wrapAsync(async (req, res) => {
     let id = req.params.id;
     let list = await listing.findById(id);
+    if (!list) {
+      req.flash("error","listing not found please check carefully");
+      return res.redirect("/listings");
+    }
     res.render("listings/edit", { list });
   })
 );
@@ -78,6 +93,7 @@ router.put(
       location,
       country,
     });
+    req.flash("success","updated successfully")
     res.redirect(`/listings/${id}`);
   })
 );
@@ -87,6 +103,8 @@ router.delete(
   wrapAsync(async (req, res) => {
     let id = req.params.id;
     await listing.findByIdAndDelete(id);
+    req.flash("success", "Successfully deleted the listing");
+    console.log("Deleted listing with id:", id);
     res.redirect("/listings");
   })
 );

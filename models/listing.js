@@ -7,7 +7,7 @@ const listingSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    maxlength: 30,
+    maxlength: 3000,
   },
   description: String,
   image: {

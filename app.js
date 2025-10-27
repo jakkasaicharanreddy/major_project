@@ -6,6 +6,23 @@ const methoidOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 let ExpressError = require("./utils/ExpressError.js");
 const Review = require("./models/reviews.js");
+//const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const flash = require("connect-flash");
+
+//cookie parser middleware
+//app.use(cookieParser("secret"));
+//session middleware
+app.use(session({
+  secret: "secret",
+  resave: false,
+  saveUninitialized: true
+}));
+//flash middleware
+app.use(flash());
+
+
+
 
 //requiring the routes files
 
@@ -33,11 +50,16 @@ app.use(methoidOverride("_method"));
 
 app.engine("ejs", ejsMate);
 
-// getting routes from other files
-
-app.get("/", (req, res) => {
-  res.send("Wanderlust");
+//middlewares
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+  next();
 });
+
+
+
+// getting routes from other files
 
 app.use("/listings",listings);
 app.use("/listings/:id/reviews",reviews);

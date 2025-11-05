@@ -15,6 +15,10 @@ async function main() {
 
 app.get("/", async (req, res) => {
   await listing.deleteMany();
+  initdata.data = initdata.data.map((obj)=> ({
+    ...obj,
+    owner : "6901f3eb846b53f199bcddf2"
+  }));
   await listing.insertMany(initdata.data);
   console.log("data added  to  database succesfully");
 });

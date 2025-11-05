@@ -6,9 +6,18 @@ const methoidOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 let ExpressError = require("./utils/ExpressError.js");
 const Review = require("./models/reviews.js");
+
+
 //const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const flash = require("connect-flash");
+
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
+
+
+
 
 //cookie parser middleware
 //app.use(cookieParser("secret"));
@@ -21,13 +30,21 @@ app.use(session({
 //flash middleware
 app.use(flash());
 
+//passport configuration
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 
 
 
 //requiring the routes files
 
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
+const listingsRoute = require("./routes/listing.js");
+const reviewsRoute = require("./routes/review.js");
+const userRoute = require("./routes/user.js");
 
 //connecting to database
 
@@ -50,10 +67,15 @@ app.use(methoidOverride("_method"));
 
 app.engine("ejs", ejsMate);
 
+app.get("/", (req, res) => {  
+  res.send("home page");
+})
+
 //middlewares
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
+    res.locals.curruser = req.user;
   next();
 });
 
@@ -61,8 +83,9 @@ app.use((req, res, next) => {
 
 // getting routes from other files
 
-app.use("/listings",listings);
-app.use("/listings/:id/reviews",reviews);
+app.use("/listings",listingsRoute);
+app.use("/listings/:id/reviews",reviewsRoute);
+app.use("/",userRoute);
 
 
 //error handling

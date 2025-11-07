@@ -17,6 +17,7 @@ const listingSchema = new mongoose.Schema({
       default:
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.houseplans.com%2Fblog%2Fbuild-an-airbnb-home-its-not-just-for-millennials&psig=AOvVaw1L-qGkNwOgsaEtSdBv8rOx&ust=1760249153567000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCNCT76_Am5ADFQAAAAAdAAAAABAE",
     },
+    filenamwe: String,
   },
   price: Number,
   location: String,

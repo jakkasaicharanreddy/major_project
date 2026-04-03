@@ -71,19 +71,17 @@ app.use(methoidOverride("_method"));
 
 app.engine("ejs", ejsMate);
 
-app.get("/", (req, res) => {  
-  res.send("home page");
-})
-
 //middlewares
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
-    res.locals.error = req.flash("error");
-    res.locals.curruser = req.user;
+  res.locals.error = req.flash("error");
+  res.locals.curruser = req.user || null;
   next();
 });
 
-
+app.get("/", (req, res) => {  
+  res.render("listings/home");
+})
 
 // getting routes from other files
 

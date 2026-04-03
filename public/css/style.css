@@ -160,3 +160,15 @@ height: 20rem;
     border: 1px solid black;
     margin:1rem;
 }
+
+
+#homepage{
+    height: 100%;
+    width: 100%;
+    background-color: #c73333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+

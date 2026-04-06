@@ -1,0 +1,53 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-4">My Bookings</h1>
+
+        <% if (bookings.length === 0) { %>
+        <div class="text-center mt-5">
+            <i class="fa fa-calendar-o fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No bookings yet</h3>
+            <p class="text-muted">Start planning your next trip!</p>
+            <a href="/listings" class="btn btn-primary">Browse Listings</a>
+        </div>
+        <% } else { %>
+        <div class="row g-4">
+            <% for(let booking of bookings){ %>
+            <div class="col-md-6 col-lg-4">
+                <% if (booking.listing) { %>
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="<%= booking.listing.image.url %>" class="card-img-top" alt="listing image" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= booking.listing.title %></h6>
+                        <p class="card-text text-muted small"><%= booking.listing.location %>, <%= booking.listing.country %></p>
+                        <p class="card-text">
+                            <strong>Check-in:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Total:</strong> &#8377; <%= booking.totalPrice.toLocaleString("en-in") %>
+                        </p>
+                        <span class="badge bg-<%= booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : 'danger' %>">
+                            <%= booking.status %>
+                        </span>
+                    </div>
+                </div>
+                <% } else { %>
+                <div class="card h-100 border-0 shadow-sm p-4">
+                    <div class="card-body">
+                        <h6 class="card-title">Listing deleted</h6>
+                        <p class="card-text text-muted small">This booking references a listing that has been removed.</p>
+                        <p class="card-text">
+                            <strong>Check-in:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Total:</strong> &#8377; <%= booking.totalPrice.toLocaleString("en-in") %>
+                        </p>
+                        <span class="badge bg-danger">Listing removed</span>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+</body>

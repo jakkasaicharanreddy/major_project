@@ -49,6 +49,8 @@ passport.deserializeUser(User.deserializeUser());
 const listingsRoute = require("./routes/listing.js");
 const reviewsRoute = require("./routes/review.js");
 const userRoute = require("./routes/user.js");
+const wishlistRoute = require("./routes/wishlist.js");
+const bookingRoute = require("./routes/booking.js");
 
 //connecting to database
 
@@ -88,6 +90,8 @@ app.get("/", (req, res) => {
 app.use("/listings",listingsRoute);
 app.use("/listings/:id/reviews",reviewsRoute);
 app.use("/",userRoute);
+app.use("/wishlist", wishlistRoute);
+app.use("/bookings", bookingRoute);
 
 
 //error handling

@@ -10,14 +10,14 @@
                     <div class="search-filter-container bg-white p-4 rounded-3 shadow-sm mb-4">
                         <form method="GET" action="/listings" class="row g-3">
                             <!-- Search Input -->
-                            <div class="col-12 col-md-5">
+                            <div class="col-12 col-md-4">
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="fas fa-search"></i>
                                     </span>
-                                    <input type="text" name="search" class="form-control"
+                                    <input type="text" name="q" class="form-control"
                                            placeholder="Search by title, location, or country"
-                                           value="<%= search %>">
+                                           value="<%= q %>">
                                 </div>
                             </div>
 
@@ -35,32 +35,41 @@
                                 </div>
                             </div>
 
+                            <!-- Guests -->
+                            <div class="col-12 col-md-2">
+                                <select name="guests" class="form-select">
+                                    <option value="">Guests</option>
+                                    <% for (let i = 1; i <= 20; i++) { %>
+                                    <option value="<%= i %>" <%= guests == i ? 'selected' : '' %>><%= i %>+ guests</option>
+                                    <% } %>
+                                </select>
+                            </div>
+
                             <!-- Sort Options -->
                             <div class="col-12 col-md-2">
                                 <select name="sort" class="form-select">
                                     <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Latest</option>
                                     <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
-                                    <option value="price-low" <%= sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
-                                    <option value="price-high" <%= sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                                    <option value="price_asc" <%= sort === 'price_asc' || sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                                    <option value="price_desc" <%= sort === 'price_desc' || sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
                                 </select>
                             </div>
 
                             <!-- Search Button -->
-                            <div class="col-12 col-md-2">
-                                <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                            <div class="col-12 col-md-1">
+                                <button type="submit" class="btn btn-primary w-100" title="Search">
                                     <i class="fas fa-search"></i>
-                                    <span class="d-none d-md-inline ms-1">Search</span>
                                 </button>
                             </div>
                         </form>
 
                         <!-- Active Filters Display -->
-                        <% if (search || minPrice || maxPrice || sort !== 'newest') { %>
+                        <% if (hasActiveFilters) { %>
                         <div class="mt-3 pt-3 border-top">
                             <div class="d-flex flex-wrap gap-2 align-items-center">
                                 <small class="text-muted fw-semibold">Active filters:</small>
-                                <% if (search) { %>
-                                    <span class="badge bg-primary">Search: "<%= search %>"</span>
+                                <% if (q) { %>
+                                    <span class="badge bg-primary">Search: "<%= q %>"</span>
                                 <% } %>
                                 <% if (minPrice) { %>
                                     <span class="badge bg-success">Min: ₹<%= minPrice %></span>
@@ -68,9 +77,12 @@
                                 <% if (maxPrice) { %>
                                     <span class="badge bg-success">Max: ₹<%= maxPrice %></span>
                                 <% } %>
+                                <% if (guests) { %>
+                                    <span class="badge bg-info"><%= guests %>+ guests</span>
+                                <% } %>
                                 <% if (sort !== 'newest') { %>
                                     <span class="badge bg-info">
-                                        Sort: <%= sort === 'oldest' ? 'Oldest' : sort === 'price-low' ? 'Price: Low to High' : 'Price: High to Low' %>
+                                        Sort: <%= sort === 'oldest' ? 'Oldest' : (sort === 'price_asc' || sort === 'price-low') ? 'Price: Low to High' : 'Price: High to Low' %>
                                     </span>
                                 <% } %>
                                 <a href="/listings" class="btn btn-sm btn-outline-secondary ms-auto">
@@ -81,6 +93,13 @@
                         <% } %>
                     </div>
                 </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <p class="text-muted mb-0"><%= totalListings %> stay<%= totalListings === 1 ? '' : 's' %> found</p>
+                <% if (hasActiveFilters) { %>
+                <a href="/listings" class="btn btn-sm btn-outline-secondary">Clear Filters</a>
+                <% } %>
             </div>
 
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4 justify-content-center">
@@ -107,6 +126,9 @@
                             </a>
                             <p class="card-text text-muted small mb-1"><%= listing.location %>, <%= listing.country %></p>
                             <p class="card-text fw-bold mb-0">&#8377; <%= listing.price ? listing.price.toLocaleString("en-in") : "N/A" %> <span class="text-muted fw-normal">night</span></p>
+                            <% if (listing.maxGuests) { %>
+                            <p class="card-text text-muted small mb-0">&#128101; Up to <%= listing.maxGuests %> guests</p>
+                            <% } %>
                         </div>
                     </div>
                 </div>
@@ -115,7 +137,10 @@
 
             <% if (allListings.length === 0) { %>
             <div class="text-center mt-5">
-                <p class="text-muted">No listings found. Try adjusting your search.</p>
+                <i class="fa fa-search fa-3x text-muted mb-3"></i>
+                <h3 class="text-muted">No listings found</h3>
+                <p class="text-muted">Try adjusting your search or filters.</p>
+                <a href="/listings" class="btn btn-primary">Clear Filters</a>
             </div>
             <% } %>
 
@@ -125,19 +150,19 @@
                 <ul class="pagination justify-content-center">
                     <% if (hasPrevPage) { %>
                     <li class="page-item">
-                        <a class="page-link" href="?page=<%= prevPage %>&search=<%= search %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">Previous</a>
+                        <a class="page-link" href="?page=<%= prevPage %>&q=<%= q %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&guests=<%= guests %>">Previous</a>
                     </li>
                     <% } %>
 
                     <% for (let i = 1; i <= totalPages; i++) { %>
                     <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                        <a class="page-link" href="?page=<%= i %>&search=<%= search %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>"><%= i %></a>
+                        <a class="page-link" href="?page=<%= i %>&q=<%= q %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&guests=<%= guests %>"><%= i %></a>
                     </li>
                     <% } %>
 
                     <% if (hasNextPage) { %>
                     <li class="page-item">
-                        <a class="page-link" href="?page=<%= nextPage %>&search=<%= search %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">Next</a>
+                        <a class="page-link" href="?page=<%= nextPage %>&q=<%= q %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&guests=<%= guests %>">Next</a>
                     </li>
                     <% } %>
                 </ul>

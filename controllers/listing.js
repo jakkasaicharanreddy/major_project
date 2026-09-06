@@ -10,39 +10,70 @@ function parseMaxGuests(value) {
     return maxGuests;
 }
 
+function escapeRegex(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 module.exports.index = async (req, res) => {
-    const { search, minPrice, maxPrice, sort = 'newest', page = 1, limit = 12 } = req.query;
+    const { q, search, minPrice, maxPrice, guests, sort = 'newest', page = 1, limit = 12 } = req.query;
+    const keyword = (q || search || "").trim();
     let query = {};
     let sortOptions = {};
 
-    // Build search query
-    if (search) {
+    // Keyword search (case-insensitive across title, location, country, description)
+    if (keyword) {
+        const pattern = escapeRegex(keyword);
         query.$or = [
-            { title: { $regex: search, $options: 'i' } },
-            { location: { $regex: search, $options: 'i' } },
-            { country: { $regex: search, $options: 'i' } }
+            { title: { $regex: pattern, $options: "i" } },
+            { location: { $regex: pattern, $options: "i" } },
+            { country: { $regex: pattern, $options: "i" } },
+            { description: { $regex: pattern, $options: "i" } }
         ];
     }
 
-    // Build price filter
-    if (minPrice || maxPrice) {
+    // Price filters (valid positive numbers only; invalid values are safely ignored)
+    const parsedMinPrice = Number(minPrice);
+    const parsedMaxPrice = Number(maxPrice);
+    if (
+        (minPrice !== undefined && minPrice !== "" && Number.isFinite(parsedMinPrice) && parsedMinPrice > 0) ||
+        (maxPrice !== undefined && maxPrice !== "" && Number.isFinite(parsedMaxPrice) && parsedMaxPrice > 0)
+    ) {
         query.price = {};
-        if (minPrice) query.price.$gte = parseInt(minPrice);
-        if (maxPrice) query.price.$lte = parseInt(maxPrice);
+        if (Number.isFinite(parsedMinPrice) && parsedMinPrice > 0) {
+            query.price.$gte = parsedMinPrice;
+        }
+        if (Number.isFinite(parsedMaxPrice) && parsedMaxPrice > 0) {
+            query.price.$lte = parsedMaxPrice;
+        }
     }
 
-    // Build sort options
+    // Guest capacity filter (positive integer; legacy listings without maxGuests are still included)
+    const parsedGuests = Number(guests);
+    if (guests !== undefined && guests !== "" && Number.isInteger(parsedGuests) && parsedGuests > 0) {
+        query.$and = [
+            {
+                $or: [
+                    { maxGuests: { $gte: parsedGuests } },
+                    { maxGuests: { $exists: false } }
+                ]
+            }
+        ];
+    }
+
+    // Sort whitelist (never trust arbitrary sort expressions from the browser)
     switch (sort) {
-        case 'oldest':
-            sortOptions = { createdAt: 1, _id: 1 };
-            break;
-        case 'price-low':
+        case "price_asc":
+        case "price-low":
             sortOptions = { price: 1 };
             break;
-        case 'price-high':
+        case "price_desc":
+        case "price-high":
             sortOptions = { price: -1 };
             break;
-        case 'newest':
+        case "oldest":
+            sortOptions = { createdAt: 1, _id: 1 };
+            break;
+        case "newest":
         default:
             sortOptions = { createdAt: -1, _id: -1 };
             break;
@@ -53,12 +84,17 @@ module.exports.index = async (req, res) => {
     const totalListings = await listing.countDocuments(query);
     const totalPages = Math.ceil(totalListings / limit);
 
+    const hasActiveFilters = !!(keyword || parsedMinPrice > 0 || parsedMaxPrice > 0 || parsedGuests > 0);
+
     res.render("listings/index", {
         allListings,
-        search: search || '',
-        minPrice: minPrice || '',
-        maxPrice: maxPrice || '',
-        sort: sort || 'newest',
+        q: keyword,
+        minPrice: minPrice || "",
+        maxPrice: maxPrice || "",
+        guests: guests || "",
+        sort: sort || "newest",
+        totalListings,
+        hasActiveFilters,
         currentPage: parseInt(page),
         totalPages,
         hasNextPage: page < totalPages,

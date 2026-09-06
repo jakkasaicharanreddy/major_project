@@ -1,0 +1,94 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-2">Booking Requests</h1>
+        <p class="text-muted mb-4">Incoming requests for listings you host</p>
+
+        <% if (bookings.length === 0) { %>
+        <div class="text-center mt-5">
+            <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No booking requests yet</h3>
+            <p class="text-muted">When someone books one of your listings, it will show up here.</p>
+            <a href="/listings" class="btn btn-primary">View Listings</a>
+        </div>
+        <% } else { %>
+        <% const pendingBookings = bookings.filter((booking) => booking.status === "pending"); %>
+        <% const processedBookings = bookings.filter((booking) => booking.status !== "pending"); %>
+
+        <h2 class="h5 mb-3">Pending requests</h2>
+        <% if (pendingBookings.length === 0) { %>
+        <p class="text-muted mb-4">No pending requests right now.</p>
+        <% } else { %>
+        <div class="row g-4 mb-5">
+            <% for (let booking of pendingBookings) { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-start border-warning border-4">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= booking.listing ? booking.listing.title : "Listing deleted" %></h6>
+                        <p class="card-text text-muted small mb-2">
+                            <% if (booking.user) { %>
+                            <strong>Renter:</strong> <%= booking.user.username || "Unknown" %><% if (booking.user.email) { %> (<%= booking.user.email %>)<% } %><br>
+                            <% } else { %>
+                            <strong>Renter:</strong> Unknown<br>
+                            <% } %>
+                            <strong>Check-in:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Guests:</strong> <%= booking.guests %><br>
+                            <strong>Total:</strong> &#8377; <%= booking.totalPrice.toLocaleString("en-in") %><br>
+                            <% if (booking.createdAt) { %>
+                            <strong>Requested:</strong> <%= booking.createdAt.toDateString() %>
+                            <% } %>
+                        </p>
+                        <span class="badge bg-warning text-dark mb-3"><%= booking.status %></span>
+                        <div class="d-flex gap-2">
+                            <form method="post" action="/bookings/<%= booking._id %>/accept" class="flex-fill">
+                                <button type="submit" class="btn btn-success w-100">Accept</button>
+                            </form>
+                            <form method="post" action="/bookings/<%= booking._id %>/reject" class="flex-fill">
+                                <button type="submit" class="btn btn-outline-danger w-100">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <h2 class="h5 mb-3">Processed bookings</h2>
+        <% if (processedBookings.length === 0) { %>
+        <p class="text-muted">No confirmed or cancelled bookings yet.</p>
+        <% } else { %>
+        <div class="row g-4">
+            <% for (let booking of processedBookings) { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= booking.listing ? booking.listing.title : "Listing deleted" %></h6>
+                        <p class="card-text text-muted small mb-2">
+                            <% if (booking.user) { %>
+                            <strong>Renter:</strong> <%= booking.user.username || "Unknown" %><% if (booking.user.email) { %> (<%= booking.user.email %>)<% } %><br>
+                            <% } else { %>
+                            <strong>Renter:</strong> Unknown<br>
+                            <% } %>
+                            <strong>Check-in:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Guests:</strong> <%= booking.guests %><br>
+                            <strong>Total:</strong> &#8377; <%= booking.totalPrice.toLocaleString("en-in") %><br>
+                            <% if (booking.createdAt) { %>
+                            <strong>Requested:</strong> <%= booking.createdAt.toDateString() %>
+                            <% } %>
+                        </p>
+                        <span class="badge bg-<%= booking.status === 'confirmed' ? 'success' : 'danger' %>">
+                            <%= booking.status %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+        <% } %>
+    </div>
+</body>

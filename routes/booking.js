@@ -3,6 +3,7 @@ const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
 const Booking = require("../models/booking");
 const Listing = require("../models/listing");
+const Notification = require("../models/notification");
 const { isLoggedin } = require("../midlewares");
 const bookingController = require("../controllers/booking");
 
@@ -126,6 +127,20 @@ router.post("/:listingId", isLoggedin, wrapAsync(async (req, res) => {
 
         await booking.save();
         console.log("Booking created successfully");
+
+        try {
+            const notification = new Notification({
+                recipient: listing.owner,
+                type: "new_booking_request",
+                message: `New booking request for ${listing.title} from ${req.user.username}.`,
+                booking: booking._id,
+                listing: listing._id
+            });
+            await notification.save();
+        } catch (notifErr) {
+            console.error("Error creating booking notification:", notifErr);
+        }
+
         req.flash("success", "Booking request sent!");
         res.redirect(`/listings/${listingId}`);
     } catch (err) {

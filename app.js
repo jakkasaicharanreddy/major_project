@@ -10,6 +10,7 @@ const methoidOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 let ExpressError = require("./utils/ExpressError.js");
 const Review = require("./models/reviews.js");
+const Notification = require("./models/notification.js");
 
 
 //const cookieParser = require("cookie-parser");
@@ -51,6 +52,7 @@ const reviewsRoute = require("./routes/review.js");
 const userRoute = require("./routes/user.js");
 const wishlistRoute = require("./routes/wishlist.js");
 const bookingRoute = require("./routes/booking.js");
+const notificationRoute = require("./routes/notification.js");
 
 //connecting to database
 
@@ -91,10 +93,21 @@ app.use(methoidOverride("_method"));
 app.engine("ejs", ejsMate);
 
 //middlewares
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.curruser = req.user || null;
+  res.locals.unreadNotifications = 0;
+  if (req.user) {
+    try {
+      res.locals.unreadNotifications = await Notification.countDocuments({
+        recipient: req.user._id,
+        isRead: false
+      });
+    } catch (err) {
+      console.error("Error counting unread notifications:", err);
+    }
+  }
   next();
 });
 
@@ -109,6 +122,7 @@ app.use("/listings/:id/reviews",reviewsRoute);
 app.use("/",userRoute);
 app.use("/wishlist", wishlistRoute);
 app.use("/bookings", bookingRoute);
+app.use("/notifications", notificationRoute);
 
 
 //error handling

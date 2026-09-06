@@ -1,5 +1,6 @@
 const Booking = require("../models/booking");
 const Listing = require("../models/listing");
+const Notification = require("../models/notification");
 
 async function loadOwnerBooking(req, res) {
     const booking = await Booking.findById(req.params.bookingId)
@@ -78,6 +79,20 @@ module.exports.acceptBooking = async (req, res) => {
 
         booking.status = "confirmed";
         await booking.save();
+
+        try {
+            const notification = new Notification({
+                recipient: booking.user._id,
+                type: "booking_accepted",
+                message: `Your booking request for ${booking.listing.title} has been accepted.`,
+                booking: booking._id,
+                listing: booking.listing._id
+            });
+            await notification.save();
+        } catch (notifErr) {
+            console.error("Error creating accept notification:", notifErr);
+        }
+
         req.flash("success", "Booking confirmed");
         res.redirect("/bookings/requests");
     } catch (err) {
@@ -104,6 +119,20 @@ module.exports.rejectBooking = async (req, res) => {
 
         booking.status = "cancelled";
         await booking.save();
+
+        try {
+            const notification = new Notification({
+                recipient: booking.user._id,
+                type: "booking_rejected",
+                message: `Your booking request for ${booking.listing.title} was not accepted.`,
+                booking: booking._id,
+                listing: booking.listing._id
+            });
+            await notification.save();
+        } catch (notifErr) {
+            console.error("Error creating reject notification:", notifErr);
+        }
+
         req.flash("success", "Booking rejected");
         res.redirect("/bookings/requests");
     } catch (err) {
@@ -115,7 +144,8 @@ module.exports.rejectBooking = async (req, res) => {
 
 module.exports.cancelBooking = async (req, res) => {
     try {
-        const booking = await Booking.findById(req.params.bookingId);
+        const booking = await Booking.findById(req.params.bookingId)
+            .populate("listing");
 
         if (!booking) {
             req.flash("error", "Booking not found");
@@ -144,6 +174,22 @@ module.exports.cancelBooking = async (req, res) => {
 
         booking.status = "cancelled";
         await booking.save();
+
+        try {
+            if (booking.listing && booking.listing.owner) {
+                const notification = new Notification({
+                    recipient: booking.listing.owner,
+                    type: "booking_cancelled",
+                    message: `${req.user.username} cancelled their booking request for ${booking.listing.title}.`,
+                    booking: booking._id,
+                    listing: booking.listing._id
+                });
+                await notification.save();
+            }
+        } catch (notifErr) {
+            console.error("Error creating cancel notification:", notifErr);
+        }
+
         req.flash("success", "Booking cancelled");
         res.redirect("/bookings");
     } catch (err) {

@@ -56,6 +56,14 @@
             </div>
         </div>
 
+        <% if (unreadNotifications > 0) { %>
+        <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="fa fa-bell me-2"></i>
+            <span>You have <%= unreadNotifications %> unread notification<%= unreadNotifications > 1 ? 's' : '' %>.</span>
+            <a href="/notifications" class="ms-auto btn btn-sm btn-outline-primary">View Notifications</a>
+        </div>
+        <% } %>
+
         <!-- My Bookings -->
         <h2 class="h4 mb-3">My Bookings</h2>
         <% if (myBookings.length === 0) { %>

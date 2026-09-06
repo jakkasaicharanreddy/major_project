@@ -29,6 +29,11 @@
                         <span class="badge bg-<%= booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : 'danger' %>">
                             <%= booking.status %>
                         </span>
+                        <% if (booking.status === "pending") { %>
+                        <form action="/bookings/<%= booking._id %>/cancel" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                        <% } %>
                     </div>
                 </div>
                 <% } else { %>

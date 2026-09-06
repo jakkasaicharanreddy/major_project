@@ -112,3 +112,43 @@ module.exports.rejectBooking = async (req, res) => {
         res.redirect("/bookings/requests");
     }
 };
+
+module.exports.cancelBooking = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.bookingId);
+
+        if (!booking) {
+            req.flash("error", "Booking not found");
+            return res.redirect("/bookings");
+        }
+
+        if (!booking.user.equals(req.user._id)) {
+            req.flash("error", "You are not allowed to cancel this booking");
+            return res.redirect("/bookings");
+        }
+
+        if (booking.status === "confirmed") {
+            req.flash("error", "Confirmed bookings cannot be cancelled");
+            return res.redirect("/bookings");
+        }
+
+        if (booking.status === "cancelled") {
+            req.flash("error", "This booking is already cancelled");
+            return res.redirect("/bookings");
+        }
+
+        if (booking.status !== "pending") {
+            req.flash("error", "Only pending bookings can be cancelled");
+            return res.redirect("/bookings");
+        }
+
+        booking.status = "cancelled";
+        await booking.save();
+        req.flash("success", "Booking cancelled");
+        res.redirect("/bookings");
+    } catch (err) {
+        console.error("Error cancelling booking:", err);
+        req.flash("error", "Failed to cancel booking");
+        res.redirect("/bookings");
+    }
+};

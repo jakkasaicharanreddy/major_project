@@ -23,9 +23,15 @@
 
                     <!-- Booking Section -->
                     <div class="mt-auto">
+                        <% if (curruser && list.owner && curruser._id.equals(list.owner._id)) { %>
                         <div class="card border-0 shadow-sm p-4 mb-4">
                             <h5 class="mb-3">Reserve your stay</h5>
-                            <form action="/bookings/<%= list._id %>" method="post">
+                            <p class="text-muted mb-0">You own this listing.</p>
+                        </div>
+                        <% } else { %>
+                        <div class="card border-0 shadow-sm p-4 mb-4">
+                            <h5 class="mb-3">Reserve your stay</h5>
+                            <form action="/bookings/<%= list._id %>" method="post" class="booking-form" data-price="<%= list.price %>">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label for="checkin" class="form-label">Check-in</label>
@@ -47,7 +53,12 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 py-3 fs-5">Book Now</button>
                             </form>
+                            <div id="booking-summary" class="booking-summary d-none mt-3">
+                                <p class="mb-1" id="summary-nights"></p>
+                                <p class="mb-0 fw-bold" id="summary-total"></p>
+                            </div>
                         </div>
+                        <% } %>
 
                         <% if (curruser && curruser._id.equals(list.owner._id)) { %>
                         <div class="d-flex gap-2">

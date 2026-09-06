@@ -21,6 +21,7 @@ router.get("/", isLoggedin, wrapAsync(async (req, res) => {
 router.get("/requests", isLoggedin, wrapAsync(bookingController.viewOwnerRequests));
 router.post("/:bookingId/accept", isLoggedin, wrapAsync(bookingController.acceptBooking));
 router.post("/:bookingId/reject", isLoggedin, wrapAsync(bookingController.rejectBooking));
+router.post("/:bookingId/cancel", isLoggedin, wrapAsync(bookingController.cancelBooking));
 
 function parseLocalDate(value) {
     if (!value) return null;

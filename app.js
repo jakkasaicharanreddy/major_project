@@ -59,7 +59,24 @@ main()
   .catch((err) => console.log(err));
 
 async function main() {
-  await mongoose.connect(process.env.ATLASDB_URL);
+  const atlasUrl = process.env.ATLASDB_URL;
+  const localUrl = "mongodb://127.0.0.1:27017/wonderlust";
+
+  try {
+    await mongoose.connect(atlasUrl || localUrl);
+    console.log("Connected to MongoDB:", atlasUrl || localUrl);
+  } catch (atlasErr) {
+    console.warn("Atlas connection failed, trying local MongoDB...", atlasErr.message);
+
+    try {
+      await mongoose.connect(localUrl);
+      console.log("Connected to local MongoDB:", localUrl);
+    } catch (localErr) {
+      console.error("Could not connect to MongoDB. Start MongoDB locally or set a valid ATLASDB_URL.");
+      console.error(localErr);
+      process.exit(1);
+    }
+  }
 }
 
 app.set("view engine", "ejs");

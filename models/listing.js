@@ -21,6 +21,13 @@ const listingSchema = new mongoose.Schema({
     filenamwe: String,
   },
   price: Number,
+  maxGuests: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 20,
+    default: 2,
+  },
   location: String,
   country: String,
   reviews: [

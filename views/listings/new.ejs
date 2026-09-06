@@ -41,7 +41,15 @@
                         </div>
                         </div>
 
-                        <div class="mb-3 col-md-8">
+                        <div class="mb-3 col-md-4">
+                            <label for="maxGuests" class="form-label">Maximum Guests</label>
+                            <input name="maxGuests" type="number" min="1" max="20" value="2" class="form-control" required>
+                            <div class="invalid-feedback">
+                            Maximum guests must be between 1 and 20
+                        </div>
+                        </div>
+
+                        <div class="mb-3 col-md-4">
                             <label for="country" class="form-label">country</label>
                             <input name="country" placeholder="Enter country" type="text" class="form-control" required>
                             <div class="invalid-feedback">

@@ -1,0 +1,196 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-2">My Dashboard</h1>
+        <p class="text-muted mb-4">Welcome back, <%= curruser.username %>!</p>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-2">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="h3 mb-1"><%= totalBookings %></h2>
+                        <p class="text-muted small mb-0">Total Bookings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="h3 mb-1"><%= pendingBookings %></h2>
+                        <p class="text-muted small mb-0">Pending Bookings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="h3 mb-1"><%= confirmedBookings %></h2>
+                        <p class="text-muted small mb-0">Confirmed Bookings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="h3 mb-1"><%= totalListings %></h2>
+                        <p class="text-muted small mb-0">My Listings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="h3 mb-1"><%= pendingRequestsCount %></h2>
+                        <p class="text-muted small mb-0">Pending Requests</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <a href="/bookings/requests" class="btn btn-sm btn-outline-primary w-100">All Requests</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Bookings -->
+        <h2 class="h4 mb-3">My Bookings</h2>
+        <% if (myBookings.length === 0) { %>
+        <div class="text-center mt-4 mb-4">
+            <i class="fa fa-calendar-o fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No bookings yet</h3>
+            <p class="text-muted">Start planning your next trip!</p>
+            <a href="/listings" class="btn btn-primary">Browse Listings</a>
+        </div>
+        <% } else { %>
+        <div class="row g-4 mb-4">
+            <% for (let booking of myBookings) { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <% if (booking.listing) { %>
+                    <img src="<%= booking.listing.image.url %>" class="card-img-top" alt="listing image" style="height: 160px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= booking.listing.title %></h6>
+                        <p class="card-text text-muted small"><%= booking.listing.location %>, <%= booking.listing.country %></p>
+                        <p class="card-text small">
+                            <strong>Check-in:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Guests:</strong> <%= booking.guests %><br>
+                            <strong>Total:</strong> &#8377; <%= booking.totalPrice.toLocaleString("en-in") %>
+                        </p>
+                        <span class="badge bg-<%= booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : 'danger' %>">
+                            <%= booking.status %>
+                        </span>
+                        <% if (booking.status === "pending") { %>
+                        <form action="/bookings/<%= booking._id %>/cancel" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                        <% } %>
+                    </div>
+                    <% } else { %>
+                    <div class="card-body">
+                        <h6 class="card-title">Listing deleted</h6>
+                        <p class="card-text text-muted small">This booking references a listing that has been removed.</p>
+                        <p class="card-text small">
+                            <strong>Check-in:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Guests:</strong> <%= booking.guests %><br>
+                            <strong>Total:</strong> &#8377; <%= booking.totalPrice.toLocaleString("en-in") %>
+                        </p>
+                        <span class="badge bg-<%= booking.status === 'confirmed' ? 'success' : booking.status === 'pending' ? 'warning' : 'danger' %>">
+                            <%= booking.status %>
+                        </span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <!-- My Listings -->
+        <h2 class="h4 mb-3">My Listings</h2>
+        <% if (myListings.length === 0) { %>
+        <div class="text-center mt-4 mb-4">
+            <i class="fa fa-home fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No listings yet</h3>
+            <p class="text-muted">Share your space and start hosting!</p>
+            <a href="/listings/new" class="btn btn-primary">Create a Listing</a>
+        </div>
+        <% } else { %>
+        <div class="row g-4 mb-4">
+            <% for (let ownedListing of myListings) { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="<%= ownedListing.image.url %>" class="card-img-top" alt="listing image" style="height: 160px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= ownedListing.title %></h6>
+                        <p class="card-text text-muted small"><%= ownedListing.location %>, <%= ownedListing.country %></p>
+                        <p class="card-text small">
+                            <strong>Price:</strong> &#8377; <%= ownedListing.price.toLocaleString("en-in") %> / night<br>
+                            <strong>Max guests:</strong> <%= ownedListing.maxGuests || 4 %>
+                        </p>
+                        <% const pendingCount = pendingCountByListing[ownedListing._id.toString()] || 0; %>
+                        <% if (pendingCount > 0) { %>
+                        <span class="badge bg-warning text-dark"><%= pendingCount %> pending request<%= pendingCount > 1 ? 's' : '' %></span>
+                        <% } else { %>
+                        <span class="badge bg-secondary">No pending requests</span>
+                        <% } %>
+                        <div class="d-flex gap-2 mt-2">
+                            <a href="/listings/<%= ownedListing._id %>" class="btn btn-sm btn-outline-secondary flex-fill">View</a>
+                            <a href="/listings/<%= ownedListing._id %>/edit" class="btn btn-sm btn-outline-primary flex-fill">Edit</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <!-- Booking Requests -->
+        <h2 class="h4 mb-3">Booking Requests</h2>
+        <% if (pendingRequests.length === 0) { %>
+        <div class="text-center mt-4 mb-4">
+            <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No pending requests</h3>
+            <p class="text-muted">When someone books one of your listings, it will show up here.</p>
+            <a href="/bookings/requests" class="btn btn-primary">View All Requests</a>
+        </div>
+        <% } else { %>
+        <div class="row g-4 mb-4">
+            <% for (let request of pendingRequests) { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-start border-warning border-4">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= request.listing ? request.listing.title : "Listing deleted" %></h6>
+                        <p class="card-text text-muted small mb-2">
+                            <% if (request.user) { %>
+                            <strong>Renter:</strong> <%= request.user.username || "Unknown" %><% if (request.user.email) { %> (<%= request.user.email %>)<% } %><br>
+                            <% } else { %>
+                            <strong>Renter:</strong> Unknown<br>
+                            <% } %>
+                            <strong>Check-in:</strong> <%= request.checkIn.toDateString() %><br>
+                            <strong>Check-out:</strong> <%= request.checkOut.toDateString() %><br>
+                            <strong>Guests:</strong> <%= request.guests %><br>
+                            <strong>Total:</strong> &#8377; <%= request.totalPrice.toLocaleString("en-in") %>
+                        </p>
+                        <span class="badge bg-warning text-dark mb-3"><%= request.status %></span>
+                        <div class="d-flex gap-2">
+                            <form method="post" action="/bookings/<%= request._id %>/accept" class="flex-fill">
+                                <button type="submit" class="btn btn-success w-100">Accept</button>
+                            </form>
+                            <form method="post" action="/bookings/<%= request._id %>/reject" class="flex-fill">
+                                <button type="submit" class="btn btn-outline-danger w-100">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+</body>

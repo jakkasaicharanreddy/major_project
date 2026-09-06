@@ -6,6 +6,7 @@ const middlewares = require("../midlewares.js");
 
 const userController = require("../controllers/user.js");
 const user = require("../models/user.js");
+const dashboardController = require("../controllers/dashboard.js");
 
 
 router.get("/signUp", userController.signupForm);
@@ -35,6 +36,8 @@ router.post("/login",     middlewares.saveRedirectUrl, passport.authenticate("lo
 
 // });
 
+
+router.get("/dashboard", middlewares.isLoggedin, dashboardController.dashboard);
 
 router.get("/logout",userController.logout );
 

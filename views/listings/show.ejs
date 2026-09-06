@@ -17,6 +17,7 @@
                         <h1 class="display-5 fw-bold mb-2"><%= list.title %></h1>
                         <p class="text-muted mb-3"><i class="fa fa-map-marker-alt me-2"></i><%= list.location %>, <%= list.country %></p>
                         <p class="fs-4 fw-bold text-primary mb-3">&#8377; <%= list.price.toLocaleString("en-in") %> <span class="text-muted fw-normal">per night</span></p>
+                        <p class="text-muted mb-3">&#128101; Up to <%= list.maxGuests || 4 %> guests</p>
                         <p class="lead mb-4"><%= list.description %></p>
                         <p class="text-muted small">Hosted by <%= list.owner ? list.owner.username : 'Unknown' %></p>
                     </div>
@@ -44,10 +45,10 @@
                                     <div class="col-12">
                                         <label for="guests" class="form-label">Guests</label>
                                         <select class="form-select" id="guests" name="guests">
-                                            <option value="1">1 guest</option>
-                                            <option value="2">2 guests</option>
-                                            <option value="3">3 guests</option>
-                                            <option value="4">4 guests</option>
+                                            <% const maxGuests = list.maxGuests || 4; %>
+                                            <% for (let i = 1; i <= maxGuests; i++) { %>
+                                            <option value="<%= i %>"><%= i %> guest<%= i > 1 ? 's' : '' %></option>
+                                            <% } %>
                                         </select>
                                     </div>
                                 </div>

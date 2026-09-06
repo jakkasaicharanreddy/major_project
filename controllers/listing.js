@@ -2,6 +2,14 @@ const listing = require("../models/listing.js");
 const Booking = require("../models/booking");
 const ExpressError = require("../utils/ExpressError.js");
 
+function parseMaxGuests(value) {
+    const maxGuests = Number(value);
+    if (!Number.isInteger(maxGuests) || maxGuests < 1 || maxGuests > 20) {
+        return null;
+    }
+    return maxGuests;
+}
+
 module.exports.index = async (req, res) => {
     const { search, minPrice, maxPrice, sort = 'newest', page = 1, limit = 12 } = req.query;
     let query = {};
@@ -100,7 +108,12 @@ module.exports.showListing = async (req, res) => {
     if (!req.body) {
       throw new ExpressError(400, "All fields are required");
     }
-    let { title, description, image, price, location, country } = req.body;
+    let { title, description, image, price, location, country, maxGuests } = req.body;
+    const parsedMaxGuests = parseMaxGuests(maxGuests);
+    if (!parsedMaxGuests) {
+      req.flash("error", "Maximum guests must be a whole number between 1 and 20");
+      return res.redirect("/listings/new");
+    }
     let newListing = new listing({
       title,
       description,
@@ -108,6 +121,7 @@ module.exports.showListing = async (req, res) => {
       price,
       location,
       country,
+      maxGuests: parsedMaxGuests,
     });
     newListing.owner = req.user._id;
     newListing.image.url = url;
@@ -140,7 +154,12 @@ module.exports.showListing = async (req, res) => {
 
     module.exports.updateListing = async (req, res) => {
     let id = req.params.id;
-    let { title, description, image, price, location, country } = req.body;
+    let { title, description, image, price, location, country, maxGuests } = req.body;
+    const parsedMaxGuests = parseMaxGuests(maxGuests);
+    if (!parsedMaxGuests) {
+      req.flash("error", "Maximum guests must be a whole number between 1 and 20");
+      return res.redirect(`/listings/${id}/edit`);
+    }
     await listing.findByIdAndUpdate(id, {
       title,
       description,
@@ -148,6 +167,7 @@ module.exports.showListing = async (req, res) => {
       price,
       location,
       country,
+      maxGuests: parsedMaxGuests,
     });
     req.flash("success","updated successfully")
     res.redirect(`/listings/${id}`);

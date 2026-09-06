@@ -94,8 +94,9 @@ router.post("/:listingId", isLoggedin, wrapAsync(async (req, res) => {
         }
 
         const guestCount = Number(guests);
-        if (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > 4) {
-            req.flash("error", "Guests must be a whole number between 1 and 4");
+        const maxGuests = listing.maxGuests || 4;
+        if (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > maxGuests) {
+            req.flash("error", `Guests must be a whole number between 1 and ${maxGuests}`);
             return res.redirect(`/listings/${listingId}`);
         }
 

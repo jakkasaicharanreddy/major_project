@@ -1,0 +1,70 @@
+<% layout("/layouts/boilerplate") %>
+
+<%
+    // ---- Step 12: inbox view helpers ----
+    const previewOf = (msg) => {
+        const text = msg && msg.content ? msg.content : "";
+        return text.length > 90 ? text.slice(0, 90) + "…" : text;
+    };
+    const stampOf = (msg) => {
+        const d = new Date(msg.createdAt);
+        const sameYear = d.getFullYear() === new Date().getFullYear();
+        return d.toLocaleDateString("en-IN", sameYear
+            ? { day: "numeric", month: "short" }
+            : { day: "numeric", month: "short", year: "numeric" });
+    };
+%>
+
+<body>
+    <div class="container-fluid px-4 py-4" style="max-width: 900px;">
+        <h1 class="mb-4">Messages</h1>
+
+        <% if (conversations.length === 0) { %>
+        <div class="text-center mt-5">
+            <i class="fa-regular fa-envelope fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No conversations yet</h3>
+            <p class="text-muted">Message a host from any listing page to start a conversation.</p>
+            <a href="/listings" class="btn btn-primary">Browse Listings</a>
+        </div>
+        <% } else { %>
+        <div class="list-group shadow-sm">
+            <% for (const convo of conversations) { %>
+            <%
+                const otherName = (convo.otherUser && (convo.otherUser.displayName || convo.otherUser.username)) || "User";
+                const otherImage = convo.otherUser && convo.otherUser.profileImage;
+                const listingTitle = convo.listing ? convo.listing.title : "Listing deleted";
+                const listingLocation = convo.listing ? `${convo.listing.location}, ${convo.listing.country}` : "";
+            %>
+            <a href="/messages/<%= convo.listing._id %>?with=<%= convo.otherUser._id %>" class="list-group-item list-group-item-action py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <% if (otherImage) { %>
+                    <img src="<%= otherImage %>" alt="<%= otherName %>" class="rounded-circle flex-shrink-0"
+                         style="width: 48px; height: 48px; object-fit: cover;">
+                    <% } else { %>
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <% } %>
+                    <div class="flex-grow-1" style="min-width: 0;">
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <h6 class="mb-0 text-truncate"><%= listingTitle %></h6>
+                            <small class="text-muted flex-shrink-0 ms-2"><%= stampOf(convo.latestMessage) %></small>
+                        </div>
+                        <p class="mb-0 small text-muted text-truncate">
+                            <strong><%= otherName %></strong> • <%= listingLocation %>
+                        </p>
+                        <p class="mb-0 small text-truncate <%= convo.unreadCount > 0 ? 'fw-semibold' : 'text-muted' %>">
+                            <%= previewOf(convo.latestMessage) %>
+                        </p>
+                    </div>
+                    <% if (convo.unreadCount > 0) { %>
+                    <span class="badge bg-primary rounded-pill flex-shrink-0"><%= convo.unreadCount %></span>
+                    <% } %>
+                </div>
+            </a>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+</body>

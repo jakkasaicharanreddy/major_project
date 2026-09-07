@@ -24,8 +24,17 @@
                         <p class="fs-4 fw-bold text-primary mb-3">&#8377; <%= list.price.toLocaleString("en-in") %> <span class="text-muted fw-normal">per night</span></p>
                         <p class="text-muted mb-3">&#128101; Up to <%= list.maxGuests || 4 %> guests</p>
                         <p class="lead mb-4"><%= list.description %></p>
-                        <p class="text-muted small">Hosted by <%= list.owner ? list.owner.username : 'Unknown' %></p>
+                        <p class="text-muted small">Hosted by <%= list.owner ? (list.owner.displayName || list.owner.username) : 'Unknown' %></p>
                     </div>
+
+                    <!-- Step 12: Message Host (logged-in non-owners only) -->
+                    <% if (curruser && list.owner && !curruser._id.equals(list.owner._id)) { %>
+                    <div class="mb-3">
+                        <a href="/messages/<%= list._id %>" class="btn btn-outline-primary">
+                            <i class="fa-regular fa-envelope me-1"></i> Message Host
+                        </a>
+                    </div>
+                    <% } %>
 
                     <!-- Booking Section -->
                     <div class="mt-auto">

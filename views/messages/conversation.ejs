@@ -1,0 +1,111 @@
+<% layout("/layouts/boilerplate") %>
+
+<%
+    // ---- Step 12: conversation view helpers ----
+    const otherName = otherUser ? (otherUser.displayName || otherUser.username) : "Host";
+    const senderLabel = (msg) => (msg.sender && msg.sender.displayName) || (msg.sender && msg.sender.username) || "User";
+    const formatStamp = (date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) +
+            ", " + d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
+    };
+%>
+
+<body>
+    <div class="container-fluid px-4 py-4" style="max-width: 900px;">
+        <a href="/messages" class="btn btn-sm btn-outline-secondary mb-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Messages
+        </a>
+
+        <!-- Conversation header -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <% if (listing.image && listing.image.url) { %>
+                    <img src="<%= listing.image.url %>" alt="listing image" class="rounded"
+                         style="width: 64px; height: 64px; object-fit: cover;">
+                    <% } %>
+                    <div>
+                        <h4 class="mb-0"><a href="/listings/<%= listing._id %>" class="text-decoration-none"><%= listing.title %></a></h4>
+                        <p class="text-muted small mb-0">
+                            <i class="fa fa-map-marker-alt me-1"></i><%= listing.location %>, <%= listing.country %>
+                            <% if (otherUser) { %>
+                            &nbsp;•&nbsp; Chatting with <strong><%= otherName %></strong><%= !isOwner ? ' (Host)' : '' %>
+                            <% } else { %>
+                            &nbsp;•&nbsp; <span class="text-muted">Your listing — renters will appear here when they message you</span>
+                            <% } %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message history -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <% if (messages.length === 0) { %>
+                <div class="text-center py-4">
+                    <i class="fa-regular fa-envelope fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No messages yet</h5>
+                    <p class="text-muted mb-0">
+                        <% if (isOwner) { %>
+                        When a renter contacts you about this listing, their messages will appear here.
+                        <% } else { %>
+                        Start the conversation with the host below.
+                        <% } %>
+                    </p>
+                </div>
+                <% } else { %>
+                <div class="d-flex flex-column gap-3">
+                    <% for (const msg of messages) { %>
+                    <% const mine = msg.sender && msg.sender._id && msg.sender._id.toString() === userId; %>
+                    <div class="d-flex <%= mine ? 'justify-content-end' : 'justify-content-start' %>">
+                        <div class="card <%= mine ? 'bg-primary text-white' : 'bg-light' %> shadow-sm"
+                             style="max-width: 75%;">
+                            <div class="card-body py-2 px-3">
+                                <p class="mb-1 <%= mine ? '' : 'small text-muted' %>">
+                                    <strong><%= mine ? 'You' : senderLabel(msg) %></strong>
+                                </p>
+                                <p class="mb-1" style="white-space: pre-line; overflow-wrap: anywhere;"><%= msg.content %></p>
+                                <p class="mb-0 small <%= mine ? 'text-white-50' : 'text-muted' %>">
+                                    <%= formatStamp(msg.createdAt) %>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Composer: renters always; hosts only inside a specific renter thread -->
+        <% const canCompose = !isOwner || !!otherUser; %>
+        <% if (canCompose) { %>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form action="/messages/<%= listing._id %>" method="POST">
+                    <% if (isOwner && otherUser) { %>
+                    <input type="hidden" name="with" value="<%= otherUser._id %>">
+                    <% } %>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Message <%= otherName %></label>
+                        <textarea class="form-control" id="content" name="content" rows="3" maxlength="1000"
+                                  placeholder="<%= isOwner ? 'Reply to this guest...' : 'Ask about availability, amenities, check-in details...' %>" required></textarea>
+                        <div class="form-text">Max 1000 characters.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Send
+                    </button>
+                </form>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="alert alert-light border shadow-sm">
+            <i class="fa-solid fa-circle-info me-2 text-primary"></i>
+            Renters can contact you about this listing using the "Message Host" button. Open a specific conversation from your
+            <a href="/messages">Messages</a> inbox to reply.
+        </div>
+        <% } %>
+    </div>
+</body>

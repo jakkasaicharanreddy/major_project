@@ -1,5 +1,6 @@
 const Booking = require("../models/booking");
 const Listing = require("../models/listing");
+const Message = require("../models/message");
 
 module.exports.dashboard = async (req, res) => {
     const userId = req.user._id;
@@ -25,6 +26,9 @@ module.exports.dashboard = async (req, res) => {
 
     const pendingRequests = bookingRequests.filter((booking) => booking.status === "pending");
 
+    // Step 12: unread messages for the current user (compact messaging summary)
+    const unreadMessages = await Message.countDocuments({ recipient: userId, isRead: false });
+
     const pendingCountByListing = {};
     for (const request of pendingRequests) {
         const listingId = request.listing ? request.listing._id.toString() : null;
@@ -43,6 +47,7 @@ module.exports.dashboard = async (req, res) => {
         confirmedBookings: myBookings.filter((booking) => booking.status === "confirmed").length,
         totalListings: myListings.length,
         pendingCountByListing,
+        unreadMessages,
         pageTitle: "My Dashboard"
     });
 };

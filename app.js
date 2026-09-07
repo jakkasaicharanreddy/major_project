@@ -53,6 +53,8 @@ const userRoute = require("./routes/user.js");
 const wishlistRoute = require("./routes/wishlist.js");
 const bookingRoute = require("./routes/booking.js");
 const notificationRoute = require("./routes/notification.js");
+const messageRoute = require("./routes/message.js");
+const Message = require("./models/message.js");
 
 //connecting to database
 
@@ -98,6 +100,7 @@ app.use(async (req, res, next) => {
   res.locals.error = req.flash("error");
   res.locals.curruser = req.user || null;
   res.locals.unreadNotifications = 0;
+  res.locals.unreadMessages = 0;
   if (req.user) {
     try {
       res.locals.unreadNotifications = await Notification.countDocuments({
@@ -106,6 +109,15 @@ app.use(async (req, res, next) => {
       });
     } catch (err) {
       console.error("Error counting unread notifications:", err);
+    }
+    // Step 12: unread message count for the current user only (navbar badge)
+    try {
+      res.locals.unreadMessages = await Message.countDocuments({
+        recipient: req.user._id,
+        isRead: false
+      });
+    } catch (err) {
+      console.error("Error counting unread messages:", err);
     }
   }
   next();
@@ -123,6 +135,7 @@ app.use("/",userRoute);
 app.use("/wishlist", wishlistRoute);
 app.use("/bookings", bookingRoute);
 app.use("/notifications", notificationRoute);
+app.use("/messages", messageRoute);
 
 
 //error handling

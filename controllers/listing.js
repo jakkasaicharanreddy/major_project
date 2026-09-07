@@ -47,17 +47,10 @@ module.exports.index = async (req, res) => {
         }
     }
 
-    // Guest capacity filter (positive integer; legacy listings without maxGuests are still included)
+    // Guest capacity filter (positive integer; listings without maxGuests are excluded when a guest filter is active)
     const parsedGuests = Number(guests);
     if (guests !== undefined && guests !== "" && Number.isInteger(parsedGuests) && parsedGuests > 0) {
-        query.$and = [
-            {
-                $or: [
-                    { maxGuests: { $gte: parsedGuests } },
-                    { maxGuests: { $exists: false } }
-                ]
-            }
-        ];
+        query.maxGuests = { $gte: parsedGuests };
     }
 
     // Sort whitelist (never trust arbitrary sort expressions from the browser)
@@ -120,15 +113,22 @@ module.exports.showListing = async (req, res) => {
           populate: { path: "owner" }
         })
         .populate("owner");
-      
+       
         if (!list) {
             console.log("Listing not found for ID:", id);
             req.flash("error","Listing not found. Please try again.");
             return res.redirect("/listings");
         }
        
+        // Calculate average rating from populated reviews (not stored in MongoDB)
+        let avgRating = 0;
+        if (list.reviews && list.reviews.length > 0) {
+          const totalRating = list.reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+          avgRating = Math.round((totalRating / list.reviews.length) * 10) / 10;
+        }
+       
         console.log("Listing found:", list.title);
-        res.render("listings/show", { list });
+        res.render("listings/show", { list, avgRating });
     } catch (err) {
         console.error("Error in showListing:", err);
         req.flash("error", "Error loading listing");

@@ -1,0 +1,114 @@
+<% layout("/layouts/boilerplate") %>
+
+<%
+    // ---- Step 11: graceful fallbacks for empty profile fields ----
+    const user = profileUser || curruser;
+    const displayName = (user && user.displayName) ? user.displayName : "";
+    const bio = (user && user.bio) ? user.bio : "";
+    const location = (user && user.location) ? user.location : "";
+    const profileImage = (user && user.profileImage) ? user.profileImage : "";
+    const username = user && user.username ? user.username : "user";
+    const email = user && user.email ? user.email : "";
+%>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-4">My Profile</h1>
+
+        <div class="row g-4">
+            <!-- Profile summary card -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <% if (profileImage) { %>
+                        <img src="<%= profileImage %>" alt="<%= username %>'s profile"
+                             class="rounded-circle border shadow-sm mb-3"
+                             style="width: 120px; height: 120px; object-fit: cover;"
+                             onerror="this.style.display='none'; document.getElementById('avatar-fallback').classList.remove('d-none');">
+                        <% } %>
+                        <div id="avatar-fallback" class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3 <%= profileImage ? 'd-none' : '' %>"
+                             style="width: 120px; height: 120px; font-size: 3rem;">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+
+                        <h3 class="mb-1"><%= displayName || username %></h3>
+                        <p class="text-muted mb-3">@<%= username %></p>
+
+                        <% if (location) { %>
+                        <p class="mb-2">
+                            <i class="fa-solid fa-location-dot text-muted me-1"></i>
+                            <span><%= location %></span>
+                        </p>
+                        <% } else { %>
+                        <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot me-1"></i>Location not set</p>
+                        <% } %>
+
+                        <hr>
+
+                        <div class="text-start">
+                            <h6 class="text-muted text-uppercase small mb-2">Account Information</h6>
+                            <p class="mb-1"><strong>Username:</strong> <%= username %> <span class="badge bg-secondary">read-only</span></p>
+                            <p class="mb-0"><strong>Email:</strong> <%= email || "Not set" %> <span class="badge bg-secondary">read-only</span></p>
+                        </div>
+
+                        <hr>
+
+                        <div class="text-start">
+                            <h6 class="text-muted text-uppercase small mb-2">About</h6>
+                            <% if (bio) { %>
+                            <p class="mb-0" style="white-space: pre-line;"><%= bio %></p>
+                            <% } else { %>
+                            <p class="text-muted small mb-0 fst-italic">No bio yet — tell people about yourself using the form!</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit profile form -->
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h4 class="mb-1">Edit Profile</h4>
+                        <p class="text-muted small mb-4">Update how you appear to others. Username and email cannot be changed here.</p>
+
+                        <form action="/users/profile" method="POST" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="displayName" class="form-label">Display Name</label>
+                                <input type="text" class="form-control" id="displayName" name="displayName"
+                                       value="<%= displayName %>" maxlength="80" placeholder="e.g. Alex Sharma">
+                                <div class="form-text">Optional. Shown instead of your username when set (max 80 characters).</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location"
+                                       value="<%= location %>" maxlength="100" placeholder="e.g. Hyderabad, India">
+                                <div class="form-text">Optional (max 100 characters).</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="bio" class="form-label">Bio</label>
+                                <textarea class="form-control" id="bio" name="bio" rows="5"
+                                          maxlength="500" placeholder="Tell hosts and guests a little about yourself..."><%= bio %></textarea>
+                                <div class="form-text">Optional (max 500 characters).</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="profileImage" class="form-label">Profile Image URL</label>
+                                <input type="url" class="form-control" id="profileImage" name="profileImage"
+                                       value="<%= profileImage %>" maxlength="500" placeholder="https://example.com/avatar.jpg">
+                                <div class="form-text">Optional. Paste a direct http(s) link to an image. Leave empty to use the default avatar.</div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                                <a href="/dashboard" class="btn btn-outline-secondary">Back to Dashboard</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

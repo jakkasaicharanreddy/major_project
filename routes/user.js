@@ -37,6 +37,11 @@ router.post("/login",     middlewares.saveRedirectUrl, passport.authenticate("lo
 // });
 
 
+// ---- Step 11: profile routes (authentication required via existing isLoggedin middleware) ----
+router.get("/users/profile", middlewares.isLoggedin, userController.showProfile);
+
+router.post("/users/profile", middlewares.isLoggedin, userController.updateProfile);
+
 router.get("/dashboard", middlewares.isLoggedin, dashboardController.dashboard);
 
 router.get("/logout",userController.logout );

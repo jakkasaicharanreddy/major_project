@@ -2,8 +2,21 @@
 
 <body>
     <div class="container-fluid px-4 py-4">
-        <h1 class="mb-2">My Dashboard</h1>
-        <p class="text-muted mb-4">Welcome back, <%= curruser.username %>!</p>
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <% if (curruser.profileImage) { %>
+            <img src="<%= curruser.profileImage %>" alt="profile image" class="rounded-circle border shadow-sm"
+                 style="width: 56px; height: 56px; object-fit: cover;">
+            <% } else { %>
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm"
+                 style="width: 56px; height: 56px;">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <% } %>
+            <div>
+                <h1 class="mb-0">My Dashboard</h1>
+                <p class="text-muted mb-0">Welcome back, <%= curruser.displayName || curruser.username %>!</p>
+            </div>
+        </div>
 
         <!-- Summary Cards -->
         <div class="row g-3 mb-4">

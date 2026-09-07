@@ -14,6 +14,14 @@ function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// Format a Date to YYYY-MM-DD using local timezone (matches how the frontend parses date inputs)
+function toLocalDateString(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
 module.exports.index = async (req, res) => {
     const { q, search, minPrice, maxPrice, guests, sort = 'newest', page = 1, limit = 12 } = req.query;
     const keyword = (q || search || "").trim();
@@ -126,9 +134,25 @@ module.exports.showListing = async (req, res) => {
           const totalRating = list.reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
           avgRating = Math.round((totalRating / list.reviews.length) * 10) / 10;
         }
+
+        // Fetch existing bookings that block availability (pending or confirmed only)
+        // Cancelled bookings must NOT block dates. Only retrieve checkIn/checkOut.
+        const blockedBookings = await Booking.find({
+          listing: id,
+          status: { $in: ["pending", "confirmed"] }
+        }).select("checkIn checkOut -_id").lean();
+
+        // Format blocked date ranges for the frontend (half-open interval: [checkIn, checkOut))
+        // Convert to YYYY-MM-DD strings using local timezone so the frontend can parse them cleanly
+        const blockedDates = blockedBookings
+          .map((booking) => ({
+            checkIn: toLocalDateString(booking.checkIn),
+            checkOut: toLocalDateString(booking.checkOut)
+          }))
+          .sort((a, b) => a.checkIn.localeCompare(b.checkIn));
        
         console.log("Listing found:", list.title);
-        res.render("listings/show", { list, avgRating });
+        res.render("listings/show", { list, avgRating, blockedDates });
     } catch (err) {
         console.error("Error in showListing:", err);
         req.flash("error", "Error loading listing");

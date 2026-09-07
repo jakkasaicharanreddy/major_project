@@ -27,6 +27,10 @@ const User = require("./models/user.js");
 //cookie parser middleware
 //app.use(cookieParser("secret"));
 //session middleware
+// trust proxy (required for secure cookies behind Vercel reverse proxy)
+app.set("trust proxy", 1);
+
+//session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || "dev_secret_change_me",
   resave: false,

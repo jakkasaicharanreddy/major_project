@@ -8,72 +8,63 @@
 
                 <form method="post" action="/listings/<%= list._id %>?_method=PUT" class="needs-validation" novalidate>
 
-
-
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
                         <input name="title" value="<%= list.title %>" type="text" class="form-control" required>
-                        <div class="valid-feedback">
-                            Title looks good
-                        </div>
-                        <div class="invalid-feedback">
-                            Please Enter Title
-                        </div>
+                        <div class="valid-feedback">Title looks good</div>
+                        <div class="invalid-feedback">Please Enter Title</div>
                     </div>
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea name="description" class="form-control" required><%= list.description %></textarea>
-                        <div class="invalid-feedback">
-                            Please enter a short descriptioin
-                        </div>
+                        <div class="invalid-feedback">Please enter a short description</div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="image" class="form-label">Image src</label>
+                        <label for="image" class="form-label">Image URL</label>
                         <input name="image" value="<%= list.image.url %>" type="text" class="form-control" required>
-                        <div class="invalid-feedback">
-                            Invalid Image src/link
+                        <div class="invalid-feedback">Invalid Image URL</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-3 col-md-3">
+                            <label for="price" class="form-label">Price (₹/night)</label>
+                            <input name="price" value="<%= list.price %>" type="number" min="0" class="form-control" required>
+                            <div class="invalid-feedback">Price is invalid</div>
+                        </div>
+
+                        <div class="mb-3 col-md-3">
+                            <label for="maxGuests" class="form-label">Maximum Guests</label>
+                            <input name="maxGuests" value="<%= list.maxGuests || 2 %>" type="number" min="1" max="20" class="form-control" required>
+                            <div class="invalid-feedback">Maximum guests must be between 1 and 20</div>
+                        </div>
+
+                        <div class="mb-3 col-md-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input name="country" value="<%= list.country %>" type="text" class="form-control" required>
+                            <div class="invalid-feedback">Country name is invalid</div>
+                        </div>
+
+                        <div class="mb-3 col-md-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input name="location" value="<%= list.location %>" type="text" class="form-control" required>
+                            <div class="invalid-feedback">Location is invalid</div>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="mb-3 col-md-4">
-                            <label for="price" class="form-label">Price</label>
-                            <input name="price" value="<%= list.price %>" type="text" class="form-control" required>
-                            <div class="invalid-feedback">
-                                Price is invalid
-                            </div>
+                        <div class="mb-3 col-md-6">
+                            <label for="latitude" class="form-label">Latitude (optional)</label>
+                            <input name="latitude" value="<%= list.latitude !== undefined ? list.latitude : '' %>" placeholder="e.g. 17.3850" type="number" step="any" min="-90" max="90" class="form-control">
+                            <div class="form-text">Used to show the property on the map.</div>
                         </div>
-
-                        <div class="mb-3 col-md-4">
-                            <label for="maxGuests" class="form-label">Maximum Guests</label>
-                            <input name="maxGuests" value="<%= list.maxGuests || 2 %>" type="number" min="1" max="20" class="form-control" required>
-                            <div class="invalid-feedback">
-                                Maximum guests must be between 1 and 20
-                            </div>
-                        </div>
-
-                        <div class="mb-3 col-md-4">
-                            <label for="country" class="form-label">country</label>
-                            <input name="country" value="<%= list.country %>" type="text" class="form-control" required>
-                            <div class="invalid-feedback">
-                                country name is invalid
-                            </div>
+                        <div class="mb-3 col-md-6">
+                            <label for="longitude" class="form-label">Longitude (optional)</label>
+                            <input name="longitude" value="<%= list.longitude !== undefined ? list.longitude : '' %>" placeholder="e.g. 78.4867" type="number" step="any" min="-180" max="180" class="form-control">
+                            <div class="form-text">Used to show the property on the map.</div>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="location" class="form-label">Location</label>
-                        <input name="location" value="<%= list.location %>" type="text" class="form-control" required>
-                        <div class="invalid-feedback">
-                            Location is invalid
-                        </div>
-                    </div>
-
-
-
-
 
                     <button class="btn btn-dark edit-btn mt-3 mb-3">Save The Edit</button>
                 </form>
@@ -81,4 +72,3 @@
             </div>
         </div>
     </body>
-    <!-- <script src="/js/script.js"></script> -->

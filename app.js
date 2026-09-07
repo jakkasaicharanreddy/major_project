@@ -28,9 +28,15 @@ const User = require("./models/user.js");
 //app.use(cookieParser("secret"));
 //session middleware
 app.use(session({
-  secret: "secret",
+  secret: process.env.SESSION_SECRET || "dev_secret_change_me",
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  }
 }));
 //flash middleware
 app.use(flash());
@@ -54,6 +60,7 @@ const wishlistRoute = require("./routes/wishlist.js");
 const bookingRoute = require("./routes/booking.js");
 const notificationRoute = require("./routes/notification.js");
 const messageRoute = require("./routes/message.js");
+const aiRoute = require("./routes/ai.js");
 const Message = require("./models/message.js");
 
 //connecting to database
@@ -136,6 +143,7 @@ app.use("/wishlist", wishlistRoute);
 app.use("/bookings", bookingRoute);
 app.use("/notifications", notificationRoute);
 app.use("/messages", messageRoute);
+app.use("/ai", aiRoute);
 
 
 //error handling
@@ -146,8 +154,12 @@ app.use("/", (req, res, next) => {
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong" } = err;
-  res.render("listings/error", { err });
-  // res.status(statusCode).send(message);
+  res.status(statusCode);
+  if (process.env.NODE_ENV === "production") {
+    res.render("listings/error", { err: { message } });
+  } else {
+    res.render("listings/error", { err });
+  }
 });
 
 app.listen("8080", () => {

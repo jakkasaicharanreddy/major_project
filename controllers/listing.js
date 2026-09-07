@@ -168,12 +168,14 @@ module.exports.showListing = async (req, res) => {
     if (!req.body) {
       throw new ExpressError(400, "All fields are required");
     }
-    let { title, description, image, price, location, country, maxGuests } = req.body;
+    let { title, description, image, price, location, country, maxGuests, latitude, longitude } = req.body;
     const parsedMaxGuests = parseMaxGuests(maxGuests);
     if (!parsedMaxGuests) {
       req.flash("error", "Maximum guests must be a whole number between 1 and 20");
       return res.redirect("/listings/new");
     }
+    const parsedLat = (latitude !== undefined && latitude !== "" && Number.isFinite(Number(latitude))) ? Number(latitude) : undefined;
+    const parsedLng = (longitude !== undefined && longitude !== "" && Number.isFinite(Number(longitude))) ? Number(longitude) : undefined;
     let newListing = new listing({
       title,
       description,
@@ -182,6 +184,8 @@ module.exports.showListing = async (req, res) => {
       location,
       country,
       maxGuests: parsedMaxGuests,
+      latitude: parsedLat,
+      longitude: parsedLng,
     });
     newListing.owner = req.user._id;
     newListing.image.url = url;
@@ -214,12 +218,14 @@ module.exports.showListing = async (req, res) => {
 
     module.exports.updateListing = async (req, res) => {
     let id = req.params.id;
-    let { title, description, image, price, location, country, maxGuests } = req.body;
+    let { title, description, image, price, location, country, maxGuests, latitude, longitude } = req.body;
     const parsedMaxGuests = parseMaxGuests(maxGuests);
     if (!parsedMaxGuests) {
       req.flash("error", "Maximum guests must be a whole number between 1 and 20");
       return res.redirect(`/listings/${id}/edit`);
     }
+    const parsedLat = (latitude !== undefined && latitude !== "" && Number.isFinite(Number(latitude))) ? Number(latitude) : undefined;
+    const parsedLng = (longitude !== undefined && longitude !== "" && Number.isFinite(Number(longitude))) ? Number(longitude) : undefined;
     await listing.findByIdAndUpdate(id, {
       title,
       description,
@@ -228,6 +234,8 @@ module.exports.showListing = async (req, res) => {
       location,
       country,
       maxGuests: parsedMaxGuests,
+      latitude: parsedLat,
+      longitude: parsedLng,
     });
     req.flash("success","updated successfully")
     res.redirect(`/listings/${id}`);

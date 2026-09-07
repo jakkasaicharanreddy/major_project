@@ -9,7 +9,6 @@
                     <p class="text-muted">Add a listing that looks great on mobile and desktop.</p>
                     <form method="post" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
 
-
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
                         <input name="title" placeholder="Enter Title" type="text" class="form-control" required>
@@ -20,10 +19,9 @@
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea name="description" placeholder="Enter description" class="form-control"
-                            required></textarea>
-                            <div class="invalid-feedback">
-                            Please enter a short descriptioin
+                        <textarea name="description" placeholder="Enter description" class="form-control" required></textarea>
+                        <div class="invalid-feedback">
+                            Please enter a short description
                         </div>
                     </div>
 
@@ -33,44 +31,43 @@
                     </div>
 
                     <div class="row">
-                        <div class="mb-3 col-md-4">
-                            <label for="price" class="form-label">Price</label>
-                            <input name="price" placeholder="Enter Price" type="text" class="form-control" required>
-                            <div class="invalid-feedback">
-                            Price is invalid
-                        </div>
+                        <div class="mb-3 col-md-3">
+                            <label for="price" class="form-label">Price (₹/night)</label>
+                            <input name="price" placeholder="Enter Price" type="number" min="0" class="form-control" required>
+                            <div class="invalid-feedback">Price is invalid</div>
                         </div>
 
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-3">
                             <label for="maxGuests" class="form-label">Maximum Guests</label>
                             <input name="maxGuests" type="number" min="1" max="20" value="2" class="form-control" required>
-                            <div class="invalid-feedback">
-                            Maximum guests must be between 1 and 20
-                        </div>
+                            <div class="invalid-feedback">Maximum guests must be between 1 and 20</div>
                         </div>
 
-                        <div class="mb-3 col-md-4">
-                            <label for="country" class="form-label">country</label>
+                        <div class="mb-3 col-md-3">
+                            <label for="country" class="form-label">Country</label>
                             <input name="country" placeholder="Enter country" type="text" class="form-control" required>
-                            <div class="invalid-feedback">
-                            country name is invalid
+                            <div class="invalid-feedback">Country name is invalid</div>
                         </div>
-                        </div>
-                    </div>
 
-
-
-                    <div class="mb-3">
-                        <label for="location" class="form-label">Location</label>
-                        <input name="location" placeholder="Enter location" type="text" class="form-control" required>
-                        <div class="invalid-feedback">
-                            Location is invalid
+                        <div class="mb-3 col-md-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input name="location" placeholder="Enter location" type="text" class="form-control" required>
+                            <div class="invalid-feedback">Location is invalid</div>
                         </div>
                     </div>
 
-
-
-
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label for="latitude" class="form-label">Latitude (optional)</label>
+                            <input name="latitude" placeholder="e.g. 17.3850" type="number" step="any" min="-90" max="90" class="form-control">
+                            <div class="form-text">Used to show the property on the map (e.g. 17.3850 for Hyderabad).</div>
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label for="longitude" class="form-label">Longitude (optional)</label>
+                            <input name="longitude" placeholder="e.g. 78.4867" type="number" step="any" min="-180" max="180" class="form-control">
+                            <div class="form-text">Used to show the property on the map (e.g. 78.4867 for Hyderabad).</div>
+                        </div>
+                    </div>
 
                     <button class="btn btn-dark add-btn">Add</button>
                     <br><br>

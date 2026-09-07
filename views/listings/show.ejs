@@ -111,7 +111,14 @@
         <hr class="my-5">
         <div class="row">
             <div class="col-12">
-                <h2 class="mb-4">Reviews</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Reviews</h2>
+                    <% if (list.reviews && list.reviews.length >= 2) { %>
+                    <a href="/ai/listings/<%= list._id %>/review-summary" class="btn btn-sm btn-outline-primary">
+                        <i class="fa fa-robot me-1"></i> AI Summary
+                    </a>
+                    <% } %>
+                </div>
                 <% const reviewCount = list.reviews.length; %>
                 <% const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }; %>
                 <% for (const review of list.reviews) { if (starCounts[review.rating] !== undefined) { starCounts[review.rating]++; } } %>
@@ -175,7 +182,7 @@
                                 </div>
                                 <p class="starability-result mb-2" data-rating="<%= review.rating %>">Rated: <%= review.rating %> stars</p>
                                 <p class="card-text"><%= review.comment %></p>
-                                <% if (curruser && ((review.owner && curruser._id.equals(review.owner._id)) || curruser._id.equals(list.owner._id))) { %>
+                                 <% if (curruser && review.owner && curruser._id.equals(review.owner._id)) { %>
                                 <form method="post" action="/listings/<%= list._id %>/reviews/<%= review._id %>?_method=DELETE" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
@@ -192,18 +199,35 @@
         <div class="row">
             <div class="col-12">
                 <h2 class="mb-4">Location</h2>
+                <p class="text-muted mb-3"><i class="fa fa-map-marker-alt me-2"></i><%= list.location %>, <%= list.country %></p>
+                <% if (list.latitude !== undefined && list.longitude !== undefined) { %>
                 <div id="map" style="height: 400px; width: 100%; border-radius: 12px;" class="shadow-sm"></div>
+                <% } else { %>
+                <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 200px;">
+                    <p class="text-muted mb-0"><i class="fa fa-map me-2"></i>Map coordinates not available for this listing.</p>
+                </div>
+                <% } %>
             </div>
         </div>
 
+        <% if (list.latitude !== undefined && list.longitude !== undefined) { %>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script>
-            function initMap() {
-                // Placeholder for Google Maps integration
-                // Replace with actual API key and coordinates
-                const mapElement = document.getElementById('map');
-                mapElement.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light rounded"><p class="text-muted mb-0">Map integration requires Google Maps API key</p></div>';
-            }
-            window.onload = initMap;
+            (function() {
+                const lat = <%= list.latitude %>;
+                const lng = <%= list.longitude %>;
+                const map = L.map('map').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(map);
+                L.marker([lat, lng]).addTo(map)
+                    .bindPopup('<strong><%= list.title.replace(/'/g, "\\\\'") %></strong><br><%= list.location %>, <%= list.country %>')
+                    .openPopup();
+            })();
         </script>
+        <% } %>
+
     </div> <!-- container-fluid -->
 </body>

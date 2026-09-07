@@ -16,9 +16,9 @@ const listingSchema = new mongoose.Schema({
     url: {
       type: String,
       default:
-        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.houseplans.com%2Fblog%2Fbuild-an-airbnb-home-its-not-just-for-millennials&psig=AOvVaw1L-qGkNwOgsaEtSdBv8rOx&ust=1760249153567000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCNCT76_Am5ADFQAAAAAdAAAAABAE",
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
     },
-    filenamwe: String,
+    filename: String,
   },
   price: Number,
   maxGuests: {
@@ -30,6 +30,16 @@ const listingSchema = new mongoose.Schema({
   },
   location: String,
   country: String,
+  latitude: {
+    type: Number,
+    min: -90,
+    max: 90
+  },
+  longitude: {
+    type: Number,
+    min: -180,
+    max: 180
+  },
   reviews: [
     {
       type: Schema.Types.ObjectId,

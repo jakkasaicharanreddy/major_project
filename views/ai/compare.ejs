@@ -1,0 +1,89 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-2">Compare Properties</h1>
+        <p class="text-muted mb-4">Side-by-side comparison using real database values.</p>
+
+        <% if (listings.length === 0) { %>
+        <div class="text-center mt-5">
+            <i class="fa fa-balance-scale fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No properties to compare</h3>
+            <p class="text-muted">Select at least 2 properties from the listings page.</p>
+            <a href="/listings" class="btn btn-primary">Browse Listings</a>
+        </div>
+        <% } else { %>
+
+        <% if (explanation) { %>
+        <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="fa fa-robot me-2"></i>
+            <span><strong>AI says:</strong> <%= explanation.explanation %></span>
+            <span class="ms-auto badge bg-secondary"><%= explanation.source %></span>
+        </div>
+        <% } %>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 150px;">Feature</th>
+                        <% for (const l of listings) { %>
+                        <th><%= l.title %></th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Image</th>
+                        <% for (const l of listings) { %>
+                        <td><img src="<%= l.image.url %>" alt="<%= l.title %>" style="width: 100%; max-width: 200px; height: 120px; object-fit: cover; border-radius: 8px;"></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Price</th>
+                        <% for (const l of listings) { %>
+                        <td class="fw-bold text-primary">&#8377; <%= l.price ? l.price.toLocaleString("en-in") : "N/A" %> / night</td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Location</th>
+                        <% for (const l of listings) { %>
+                        <td><%= l.location %>, <%= l.country %></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Max Guests</th>
+                        <% for (const l of listings) { %>
+                        <td><%= l.maxGuests || "N/A" %> guests</td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Rating</th>
+                        <% for (const l of listings) { %>
+                        <td><span class="text-warning">&#11088;</span> <%= l.avgRating || "N/A" %> / 5</td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Reviews</th>
+                        <% for (const l of listings) { %>
+                        <td><%= l.reviewCount || 0 %></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Description</th>
+                        <% for (const l of listings) { %>
+                        <td><small><%= l.description ? l.description.substring(0, 150) : "No description" %><%= l.description && l.description.length > 150 ? "..." : "" %></small></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <th scope="row">Action</th>
+                        <% for (const l of listings) { %>
+                        <td><a href="/listings/<%= l._id %>" class="btn btn-sm btn-outline-primary">View Details</a></td>
+                        <% } %>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+    </div>
+</body>

@@ -22,7 +22,11 @@ module.exports.saveRedirectUrl = (req,res,next)=>{
 module.exports.isOwner = async (req,res,next)=>{
     let id = req.params.id;
     let list = await listing.findById(id);
-    if( res.locals.curruser && !res.locals.curruser._id.equals(list.owner)){
+    if (!list) {
+      req.flash("error","Listing not found");
+      return res.redirect("/listings");
+    }
+    if( req.user && list.owner && !req.user._id.equals(list.owner)){
       req.flash("error","You are not allowed to do this action");
       return res.redirect(`/listings/${id}`);
     }
@@ -32,7 +36,11 @@ module.exports.isOwner = async (req,res,next)=>{
 module.exports.isReviewOwner = async (req,res,next)=>{
      let {id ,reviewId} = req.params;
     let review = await Review.findById(reviewId)
-    if( res.locals.curruser && !res.locals.curruser._id.equals(review.owner)){
+    if (!review) {
+      req.flash("error","Review not found");
+      return res.redirect(`/listings/${id}`);
+    }
+    if( req.user && !req.user._id.equals(review.owner)){
       req.flash("error","You are not allowed to do this action");
       return res.redirect(`/listings/${id}`);
     }

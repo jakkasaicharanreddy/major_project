@@ -1,0 +1,74 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4" style="max-width: 900px;">
+        <h1 class="mb-2">StayFinder Assistant</h1>
+        <p class="text-muted mb-4">Ask about real properties in our database. I can search by location, guests, price, and ratings.</p>
+
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <form method="GET" action="/ai/assistant" class="row g-3">
+                <div class="col-12 col-md-10">
+                    <input type="text" name="q" class="form-control" placeholder="e.g. Which properties can accommodate 6 guests? Show cheaper properties in Hyderabad." value="<%= query %>">
+                    <div class="form-text">I only search real listings — I never invent properties.</div>
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Ask</button>
+                </div>
+            </form>
+        </div>
+
+        <% if (query) { %>
+        <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="fa fa-robot me-2"></i>
+            <span><strong>You asked:</strong> "<%= query %>"</span>
+            <span class="ms-auto badge bg-secondary"><%= aiInfo.configured ? "LLM: " + aiInfo.provider : "intent-based" %></span>
+        </div>
+        <% } %>
+
+        <% if (answer) { %>
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <h5 class="mb-2"><i class="fa fa-comment-dots me-2 text-primary"></i>Answer</h5>
+            <p class="mb-0"><%= answer %></p>
+        </div>
+        <% } %>
+
+        <% if (relatedListings && relatedListings.length > 0) { %>
+        <h5 class="mb-3">Matching Properties (<%= relatedListings.length %>)</h5>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
+            <% for(let listing of relatedListings){ %>
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm listing-card">
+                    <a href="/listings/<%= listing._id %>" style="text-decoration: none; color: inherit;">
+                        <img src="<%= listing.image.url %>" class="card-img-top w-100" alt="listing image" style="height: 160px; object-fit: cover;">
+                    </a>
+                    <div class="card-body">
+                        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+                            <h6 class="card-title mb-1"><%= listing.title %></h6>
+                        </a>
+                        <p class="card-text text-muted small mb-1"><%= listing.location %>, <%= listing.country %></p>
+                        <p class="card-text fw-bold mb-0">&#8377; <%= listing.price ? listing.price.toLocaleString("en-in") : "N/A" %> <span class="text-muted fw-normal">night</span></p>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <% if (query && relatedListings.length === 0) { %>
+        <div class="text-center mt-4">
+            <i class="fa fa-search fa-2x text-muted mb-3"></i>
+            <p class="text-muted">No matching properties found. Try rephrasing your question.</p>
+        </div>
+        <% } %>
+
+        <div class="alert alert-light border mt-4">
+            <h6 class="mb-2"><i class="fa fa-lightbulb me-2 text-warning"></i>Try asking:</h6>
+            <ul class="mb-0 small">
+                <li>"Which properties can accommodate 6 guests?"</li>
+                <li>"Show me cheaper properties in Hyderabad"</li>
+                <li>"Which listing has the best rating?"</li>
+                <li>"Find a beach house under 3000"</li>
+            </ul>
+        </div>
+    </div>
+</body>

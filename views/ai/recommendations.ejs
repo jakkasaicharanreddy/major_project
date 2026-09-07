@@ -1,0 +1,47 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-2">Recommended For You</h1>
+        <p class="text-muted mb-4">Properties selected from our real listings using a scoring algorithm<% if (aiInfo.configured) { %> with AI-powered explanations<% } %>.</p>
+
+        <% if (explanation) { %>
+        <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="fa fa-robot me-2"></i>
+            <span><strong>AI says:</strong> <%= explanation.explanation %></span>
+            <span class="ms-auto badge bg-secondary"><%= explanation.source %></span>
+        </div>
+        <% } %>
+
+        <% if (listings.length === 0) { %>
+        <div class="text-center mt-5">
+            <i class="fa fa-star fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No recommendations yet</h3>
+            <p class="text-muted">Browse and bookmark listings to get personalized suggestions.</p>
+            <a href="/listings" class="btn btn-primary">Browse Listings</a>
+        </div>
+        <% } else { %>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <% for(let listing of listings){ %>
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm listing-card">
+                    <a href="/listings/<%= listing._id %>" style="text-decoration: none; color: inherit;">
+                        <img src="<%= listing.image.url %>" class="card-img-top w-100" alt="listing image" style="height: 200px; object-fit: cover;">
+                    </a>
+                    <div class="card-body">
+                        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+                            <h6 class="card-title mb-1"><%= listing.title %></h6>
+                        </a>
+                        <p class="card-text text-muted small mb-1"><%= listing.location %>, <%= listing.country %></p>
+                        <p class="card-text fw-bold mb-0">&#8377; <%= listing.price ? listing.price.toLocaleString("en-in") : "N/A" %> <span class="text-muted fw-normal">night</span></p>
+                        <% if (listing.reviewCount > 0) { %>
+                        <p class="card-text text-muted small mb-0"><%= listing.reviewCount %> review<%= listing.reviewCount > 1 ? "s" : "" %></p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+</body>

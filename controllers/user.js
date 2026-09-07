@@ -12,11 +12,10 @@ module.exports.signupForm = (req, res) => {
     res.render("users/signUp");
 }
 
-module.exports.signup = async (req, res) => {
+module.exports.signup = async (req, res, next) => {
 
     try{
         let {username , email, password} = req.body;
-    console.log(req.body);
 
     let newUser = new User({ username,email});
 
@@ -25,7 +24,7 @@ module.exports.signup = async (req, res) => {
         if(err){
             return next(err)
         }
-            req.flash("success","Welcome to wanderlust ! You registerd & LoggedIn successfully");
+            req.flash("success","Welcome to StayFinder! You registered & logged in successfully");
     return res.redirect("/listings")
     })
 

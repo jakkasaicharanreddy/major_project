@@ -1,0 +1,63 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+    <div class="container-fluid px-4 py-4">
+        <h1 class="mb-4">Natural Language Search</h1>
+
+        <div class="card border-0 shadow-sm p-4 mb-4">
+            <form method="GET" action="/ai/search" class="row g-3">
+                <div class="col-12 col-md-10">
+                    <input type="text" name="q" class="form-control" placeholder="e.g. I need a cheap place in Hyderabad for 4 people" value="<%= query %>">
+                    <div class="form-text">Describe what you're looking for in plain English.</div>
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <% if (query) { %>
+        <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="fa fa-robot me-2"></i>
+            <span>
+                <strong>Query:</strong> "<%= query %>"
+                <% if (parsed.location) { %> &bull; Location: <strong><%= parsed.location %></strong><% } %>
+                <% if (parsed.guests > 0) { %> &bull; Guests: <strong><%= parsed.guests %></strong><% } %>
+                <% if (parsed.maxPrice > 0) { %> &bull; Max price: <strong>₹<%= parsed.maxPrice %></strong><% } %>
+                <% if (parsed.keywords && parsed.keywords.length > 0) { %> &bull; Keywords: <strong><%= parsed.keywords.join(", ") %></strong><% } %>
+            </span>
+            <span class="ms-auto badge bg-secondary"><%= aiInfo.configured ? "LLM: " + aiInfo.provider : parsed.source %></span>
+        </div>
+
+        <p class="text-muted mb-3"><%= listings.length %> result<%= listings.length === 1 ? "" : "s" %> found from real listings.</p>
+
+        <% if (listings.length === 0) { %>
+        <div class="text-center mt-5">
+            <i class="fa fa-search fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No matching listings found</h3>
+            <p class="text-muted">Try a different description or browse all listings.</p>
+            <a href="/listings" class="btn btn-primary">Browse All Listings</a>
+        </div>
+        <% } else { %>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <% for(let listing of listings){ %>
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm listing-card">
+                    <a href="/listings/<%= listing._id %>" style="text-decoration: none; color: inherit;">
+                        <img src="<%= listing.image.url %>" class="card-img-top w-100" alt="listing image" style="height: 200px; object-fit: cover;">
+                    </a>
+                    <div class="card-body">
+                        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+                            <h6 class="card-title mb-1"><%= listing.title %></h6>
+                        </a>
+                        <p class="card-text text-muted small mb-1"><%= listing.location %>, <%= listing.country %></p>
+                        <p class="card-text fw-bold mb-0">&#8377; <%= listing.price ? listing.price.toLocaleString("en-in") : "N/A" %> <span class="text-muted fw-normal">night</span></p>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+        <% } %>
+    </div>
+</body>

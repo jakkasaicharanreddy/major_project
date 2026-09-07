@@ -49,6 +49,7 @@ router.get(
 //update listing route
 router.put(
   "/:id",
+  isLoggedin,
   isOwner,
   wrapAsync(listingController.updateListing)
 );
